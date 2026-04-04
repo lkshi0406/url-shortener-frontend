@@ -1,53 +1,286 @@
-# URL Shortener (Production-Ready Backend)
+# URL Shortener - Modern & Secure
 
-Scalable URL shortener backend using Node.js + Express + PostgreSQL + Redis, with deterministic Base62 short code generation, caching, security middleware, and a minimal React client for manual testing.
+A production-ready URL shortener built with React + Vite (Frontend) and Node.js + Express + PostgreSQL (Backend). Features password protection, QR code generation, TTL support, and a beautiful modern UI.
 
 ## Tech Stack
 
-- Backend: Node.js 18+, Express.js
-- Database: PostgreSQL 14+
-- Cache: Redis 7+
-- Optional UI: React + Vite
+**Frontend:**
+- React 19.2.4
+- Vite 8.0.1
+- QR Code Generation (qrcode.react)
+
+**Backend:**
+- Node.js 18+
+- Express.js 5.1.0
+- PostgreSQL 14+
+- Bcrypt (password hashing)
+- Helmet (security headers)
+- Rate Limiting
 
 ## Core Features
 
-- POST /shorten to create short URLs
-- GET /:shortCode to redirect to original URL
-- Deterministic Base62 short code generation from auto-increment id
-- Redis read-through cache for redirect lookups
-- Postgres index on short_code for fast retrieval
-- Duplicate URL deduplication (same normalized URL returns existing short code)
-- Optional custom aliases
-- Optional TTL expiry support
-- Basic analytics: click_count + last_accessed_at
-- Global and endpoint-level rate limiting
+✅ URL Shortening with Base62 encoding
+✅ Password Protection with bcrypt hashing
+✅ QR Code Generation
+✅ TTL/Expiration Support
+✅ Custom Aliases
+✅ URL Deduplication
+✅ Click Analytics
+✅ Rate Limiting
+✅ Security Headers
+✅ Responsive Modern UI
 
 ## Project Structure
 
-```text
-server/
-	db/
-		schema.sql
-	src/
-		config/
-			db.js
-			env.js
-			redis.js
-		controllers/
-			urlController.js
-		middlewares/
-			errorHandler.js
-			rateLimiter.js
-		repositories/
-			urlsRepository.js
-		routes/
-			urlRoutes.js
-		services/
-			cacheService.js
-			urlService.js
-		utils/
-			base62.js
-			errors.js
+```
+url-shortener/
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx          # Main React component
+│   │   ├── App.css          # Styling
+│   │   ├── main.jsx         # Entry point
+│   │   ├── index.css        # Global styles
+│   │   └── assets/          # Static assets
+│   ├── public/              # Public assets
+│   ├── index.html           # HTML template
+│   ├── vite.config.js       # Vite configuration
+│   ├── package.json         # Frontend dependencies
+│   └── eslint.config.js     # Linting config
+│
+├── backend/
+│   ├── src/
+│   │   ├── index.js         # App entry point
+│   │   ├── app.js           # Express setup
+│   │   ├── config/          # Configuration files
+│   │   │   ├── db.js        # Database connection
+│   │   │   └── env.js       # Environment variables
+│   │   ├── controllers/     # Request handlers
+│   │   ├── routes/          # API routes
+│   │   ├── services/        # Business logic
+│   │   ├── repositories/    # Database queries
+│   │   ├── middlewares/     # Express middleware
+│   │   └── utils/           # Utilities
+│   ├── db/                  # Database files
+│   ├── .env                 # Environment variables
+│   ├── package.json         # Backend dependencies
+│   ├── migrate.js           # Database migrations
+│   └── db.js                # Database utilities
+│
+├── package.json             # Root workspace config
+└── README.md                # This file
+```
+
+## Quick Start
+
+### Prerequisites
+- Node.js 18+
+- PostgreSQL 14+
+- npm or yarn
+
+### Installation & Setup
+
+1. **Install dependencies:**
+   ```bash
+   npm install
+   cd frontend && npm install
+   cd ../backend && npm install
+   cd ..
+   ```
+
+2. **Configure Backend**
+   - Copy `.env.example` to `backend/.env` (if not exists)
+   - Update PostgreSQL credentials in `backend/.env`
+   - Default: `postgres://postgres:chinni@localhost:5432/url_shortener`
+
+3. **Setup Database**
+   ```bash
+   cd backend
+   node migrate.js  # Run migrations
+   ```
+
+### Development
+
+**Terminal 1 - Start Backend:**
+```bash
+npm run backend:dev
+# Backend runs on http://localhost:5000
+```
+
+**Terminal 2 - Start Frontend:**
+```bash
+npm run frontend:dev
+# Frontend runs on http://localhost:5173
+```
+
+**Or run both together:**
+```bash
+npm run dev:all
+```
+
+### Production Build
+
+**Frontend:**
+```bash
+cd frontend
+npm run build
+npm run preview
+```
+
+**Backend:**
+```bash
+cd backend
+npm start
+```
+
+## API Endpoints
+
+### Create Short URL
+```http
+POST /shorten
+Content-Type: application/json
+
+{
+  "url": "https://example.com/very/long/url",
+  "customCode": "mycode",     // optional
+  "password": "secret123",    // optional
+  "ttlSeconds": 86400        // optional (1 day)
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "shortUrl": "http://localhost:5000/abc123",
+    "shortCode": "abc123",
+    "originalUrl": "https://example.com/very/long/url",
+    "isPasswordProtected": true,
+    "expiresAt": "2024-04-05T12:00:00Z",
+    "qrCode": "data:image/png;base64,..."
+  }
+}
+```
+
+### Redirect to Original URL
+```http
+GET /:shortCode
+
+# If password protected, returns HTML form
+# Otherwise, redirects to original URL (302)
+```
+
+### Verify Password
+```http
+POST /:shortCode/verify-password
+Content-Type: application/json
+
+{
+  "password": "secret123"
+}
+
+Response:
+{
+  "success": true,
+  "originalUrl": "https://example.com/very/long/url"
+}
+```
+
+## Database Schema
+
+```sql
+CREATE TABLE urls (
+  id BIGSERIAL PRIMARY KEY,
+  short_code VARCHAR(10) NOT NULL UNIQUE,
+  original_url TEXT NOT NULL,
+  normalized_url TEXT NOT NULL,
+  password_hash VARCHAR(255),
+  is_password_protected BOOLEAN DEFAULT FALSE,
+  ttl_seconds INT,
+  expires_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_accessed_at TIMESTAMP,
+  click_count INT DEFAULT 0
+);
+
+CREATE INDEX idx_short_code ON urls(short_code);
+CREATE INDEX idx_normalized_url ON urls(normalized_url);
+```
+
+## Configuration
+
+### Frontend Environment Variables
+- `VITE_API_BASE_URL` - Backend API URL (default: http://localhost:5000)
+
+### Backend Environment Variables
+- `NODE_ENV` - development | production
+- `PORT` - Server port (default: 5000)
+- `BASE_URL` - Base URL for short links
+- `DATABASE_URL` - PostgreSQL connection string
+- `REDIRECT_STATUS_CODE` - HTTP status for redirects (302 or 301)
+
+## Testing
+
+### Test Endpoints
+
+1. **Create a protected short URL:**
+   - Open http://localhost:5173
+   - Enter URL, set password "test123"
+   - Submit
+
+2. **Access via React App:**
+   - Click "Request Access"
+   - Enter password in modal
+
+3. **Access Direct Link:**
+   - Copy short URL to new tab
+   - Fills HTML form
+   - Enter password and unlock
+
+## Scripts
+
+**Root Level:**
+- `npm run frontend:dev` - Start frontend dev server
+- `npm run backend:dev` - Start backend with file watch
+- `npm run frontend:build` - Build frontend for production
+- `npm run backend:start` - Run backend server
+- `npm run dev:all` - Run both frontend and backend
+
+**Frontend:**
+- `npm run dev` - Start Vite dev server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+**Backend:**
+- `npm run dev` - Start with file watch (using node --watch)
+- `npm start` - Start production server
+
+## Security Features
+
+- ✅ Password hashing with bcrypt (10 rounds)
+- ✅ Helmet.js security headers
+- ✅ Rate limiting (300/min global, 30/min per endpoint)
+- ✅ Input validation and normalization
+- ✅ SQL injection prevention (parameterized queries)
+- ✅ CORS configured
+- ✅ Custom Content Security Policy for inline scripts
+- ✅ HTTP-only environment variables
+
+## Performance
+
+- Deterministic Base62 encoding for consistent short codes
+- Database indexes on frequently queried columns
+- Click count and analytics tracking
+- Normalized URL deduplication
+
+## Future Enhancements (Tier 2)
+
+- Link preview feature
+- Custom domain support
+- Advanced analytics dashboard
+- QR code download
+- Link groups/management
+- API key authentication
+- Email notifications
 			url.js
 		app.js
 		index.js

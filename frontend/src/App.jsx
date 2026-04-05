@@ -13,6 +13,7 @@ function App() {
   const [error, setError] = useState('');
   const [requiresPassword, setRequiresPassword] = useState(false);
   const [verifyPassword, setVerifyPassword] = useState('');
+  const [copyMessage, setCopyMessage] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -166,13 +167,15 @@ function App() {
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(result.shortUrl);
-                      alert('Copied!');
+                      setCopyMessage('Copied!');
+                      setTimeout(() => setCopyMessage(''), 2000);
                     }}
                     className="copy-btn"
                   >
                     Copy
                   </button>
                 </div>
+                {copyMessage && <span className="copy-message">{copyMessage}</span>}
                 {result.isPasswordProtected && <span className="badge">🔒 Protected</span>}
               </div>
             )}

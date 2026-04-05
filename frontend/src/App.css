@@ -199,7 +199,7 @@ html, body, #root {
   background: #f4e8ec;
   border: 1px solid #d9b3c2;
   border-radius: 10px;
-  padding: 16px;
+  padding: 20px;
   display: grid;
   gap: 12px;
 }
@@ -208,6 +208,7 @@ html, body, #root {
   font-weight: 600;
   color: #8B1E3E;
   font-size: 14px;
+  display: none;
 }
 
 .result-url {
@@ -215,23 +216,26 @@ html, body, #root {
   gap: 12px;
   align-items: center;
   background: white;
-  padding: 12px 14px;
-  border-radius: 6px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 2px solid #8B1E3E;
 }
 
 .result-url a {
   color: #8B1E3E;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
   flex: 1;
   word-break: break-all;
+  font-size: 16px;
 }
 
 .result-url span {
   color: #1a1a1a;
-  font-weight: 600;
+  font-weight: 700;
   flex: 1;
   word-break: break-all;
+  font-size: 16px;
 }
 
 .copy-btn {

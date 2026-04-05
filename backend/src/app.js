@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import urlRoutes from './routes/urlRoutes.js';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler.js';
 import { globalRateLimiter } from './middlewares/rateLimiter.js';
+import { initializeDatabase } from './utils/initDb.js';
 
 const app = express();
 
@@ -32,6 +33,18 @@ app.get('/health', (req, res) => {
     success: true,
     message: 'Service is healthy.',
   });
+});
+
+app.post('/setup', async (req, res, next) => {
+  try {
+    await initializeDatabase();
+    res.status(200).json({
+      success: true,
+      message: 'Database initialized successfully.',
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.use('/', urlRoutes);

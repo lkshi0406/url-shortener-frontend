@@ -35,7 +35,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.post('/setup', async (req, res, next) => {
+app.get('/setup', async (req, res, next) => {
   try {
     await initializeDatabase();
     res.status(200).json({

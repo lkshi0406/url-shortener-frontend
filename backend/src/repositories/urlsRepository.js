@@ -34,12 +34,12 @@ export const urlsRepository = {
     return result.rows[0];
   },
 
-  async createPending({ originalUrl, normalizedUrl, expiresAt, passwordHash, isPasswordProtected }) {
+  async createPending({ originalUrl, normalizedUrl, shortCode, expiresAt, passwordHash, isPasswordProtected }) {
     const result = await dbPool.query(
-      `INSERT INTO urls (original_url, normalized_url, expires_at, password_hash, is_password_protected)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, original_url, normalized_url, created_at, expires_at, password_hash, is_password_protected`,
-      [originalUrl, normalizedUrl, expiresAt, passwordHash, isPasswordProtected],
+      `INSERT INTO urls (original_url, normalized_url, short_code, expires_at, password_hash, is_password_protected)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, original_url, normalized_url, short_code, created_at, expires_at, password_hash, is_password_protected`,
+      [originalUrl, normalizedUrl, shortCode, expiresAt, passwordHash, isPasswordProtected],
     );
 
     return result.rows[0];

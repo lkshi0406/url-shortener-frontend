@@ -1,8 +1,8 @@
 import { urlsRepository } from '../repositories/urlsRepository.js';
-import { encodeBase62 } from '../utils/base62.js';
 import { HttpError } from '../utils/errors.js';
 import { isPotentiallyUnsafeHost, isValidHttpUrl, normalizeUrl } from '../utils/url.js';
 import { passwordService } from './passwordService.js';
+import { nanoid } from 'nanoid';
 
 const CUSTOM_CODE_PATTERN = /^[a-zA-Z0-9_-]{4,32}$/;
 
@@ -80,18 +80,16 @@ export const urlService = {
       return toResponse(existingByUrl, baseUrl);
     }
 
-    const pending = await urlsRepository.createPending({
+    // Generate a short code using nanoid (6 characters)
+    const shortCode = nanoid(6);
+
+    const created = await urlsRepository.createPending({
       originalUrl: normalizedUrl,
       normalizedUrl,
+      shortCode,
       expiresAt,
       passwordHash,
       isPasswordProtected,
-    });
-
-    const shortCode = encodeBase62(pending.id);
-    const created = await urlsRepository.updateShortCode({
-      id: pending.id,
-      shortCode,
     });
 
     return toResponse(created, baseUrl);

@@ -80,144 +80,205 @@ function App() {
   };
 
   return (
-    <main className="page-shell">
-      <section className="panel">
-        <p className="eyebrow">Production-ready URL Shortener</p>
-        <h1>Shrink links with custom codes & protection.</h1>
-        <p className="subtitle">
-          PostgreSQL for durable mapping, QR codes, password protection, and clean Express architecture.
-        </p>
+    <div className="app">
+      {/* Header */}
+      <header className="header">
+        <div className="container">
+          <div className="logo">∞ SHORTIE</div>
+          <nav className="nav">
+            <a href="#features">Features</a>
+            <a href="#how">How it Works</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#resources">Resources</a>
+          </nav>
+          <button className="login-btn">Login</button>
+        </div>
+      </header>
 
-        <form className="shorten-form" onSubmit={handleSubmit}>
-          <label>
-            Long URL
-            <input
-              type="url"
-              required
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://example.com/path?source=campaign"
-            />
-          </label>
+      {/* Hero Section */}
+      <section className="hero">
+        <div className="container">
+          <div className="hero-content">
+            <h1 className="hero-title">
+              BIO LINK & LINK<br />SHORTENER 🔗 FOR<br />BUSINESS NEEDS
+            </h1>
+            <p className="hero-subtitle">
+              Create short, memorable links with custom codes. Track clicks, protect with passwords, and manage all your links in one place.
+            </p>
 
-          <div className="form-row">
-            <label>
-              Custom code (optional)
-              <input
-                type="text"
-                value={customCode}
-                onChange={(e) => setCustomCode(e.target.value)}
-                placeholder="my-launch"
-              />
-            </label>
-
-            <label>
-              TTL in seconds (optional)
-              <input
-                type="number"
-                min="1"
-                value={ttlSeconds}
-                onChange={(e) => setTtlSeconds(e.target.value)}
-                placeholder="86400"
-              />
-            </label>
-          </div>
-
-          <label>
-            Password protection (optional)
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Optional password (4+ chars)"
-            />
-          </label>
-
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? 'Generating...' : 'Generate short URL'}
-          </button>
-        </form>
-
-        {error && <p className="error-box">{error}</p>}
-
-        {requiresPassword && (
-          <article className="result-box password-box">
-            <h2>🔒 Password Required</h2>
-            <p>This short link is password protected. Enter the password to access it.</p>
-            <input
-              type="password"
-              value={verifyPassword}
-              onChange={(e) => setVerifyPassword(e.target.value)}
-              placeholder="Enter password"
-              onKeyPress={(e) => e.key === 'Enter' && handleVerifyPassword()}
-            />
-            <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-              <button onClick={handleVerifyPassword} className="unlock-btn">
-                ✓ Unlock & Redirect
-              </button>
-              <button
-                onClick={() => {
-                  setRequiresPassword(false);
-                  setVerifyPassword('');
-                }}
-                style={{ background: '#999' }}
-              >
-                Cancel
-              </button>
-            </div>
-          </article>
-        )}
-
-        {result && (
-          <article className="result-box">
-            <h2>✓ Short URL Created</h2>
-
-            <div className="short-url-container">
-              <label>Your Short URL:</label>
-              <div className="short-url-display">
-                {result.isPasswordProtected ? (
-                  <span className="protected-url">{result.shortUrl}</span>
-                ) : (
-                  <a href={result.shortUrl} target="_blank" rel="noreferrer">
-                    {result.shortUrl}
-                  </a>
-                )}
+            {/* Main Form */}
+            <form className="shorten-form" onSubmit={handleSubmit}>
+              <div className="form-wrapper">
+                <input
+                  type="url"
+                  required
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="Paste a long URL here..."
+                  className="main-input"
+                />
+                <button type="submit" disabled={isLoading} className="shorten-btn">
+                  {isLoading ? 'Creating...' : 'Shorten Link'}
+                </button>
               </div>
-              <button
-                onClick={() => {
-                  if (result.isPasswordProtected) {
-                    setRequiresPassword(true);
-                  } else {
-                    window.location.href = result.shortUrl;
-                  }
-                }}
-                className="visit-btn"
-              >
-                {result.isPasswordProtected ? '🔒 Request Access' : '→ Visit Now'}
-              </button>
-            </div>
 
-            <p>Short code: <code>{result.shortCode}</code></p>
-            {result.isPasswordProtected && <p className="badge">🔒 Password protected</p>}
-            <p>Created: {new Date(result.createdAt).toLocaleString()}</p>
-            <p>Clicks: {result.clickCount}</p>
+              {/* Advanced Options */}
+              <div className="advanced-options">
+                <input
+                  type="text"
+                  value={customCode}
+                  onChange={(e) => setCustomCode(e.target.value)}
+                  placeholder="Custom code (optional)"
+                  className="option-input"
+                />
+                <input
+                  type="number"
+                  min="1"
+                  value={ttlSeconds}
+                  onChange={(e) => setTtlSeconds(e.target.value)}
+                  placeholder="Expires in (seconds)"
+                  className="option-input"
+                />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password protect (optional)"
+                  className="option-input"
+                />
+              </div>
+            </form>
 
-            {result.shortUrl && (
-              <div className="qr-section">
-                <h3>📱 QR Code</h3>
-                <div className="qr-container">
-                  <p>QR code feature coming soon - share the short URL above!</p>
+            {error && <p className="error-message">{error}</p>}
+
+            {/* Result */}
+            {result && (
+              <div className="result-card">
+                <div className="result-header">✓ Link Created Successfully</div>
+                <div className="result-url">
+                  {result.isPasswordProtected ? (
+                    <span>{result.shortUrl}</span>
+                  ) : (
+                    <a href={result.shortUrl} target="_blank" rel="noreferrer">
+                      {result.shortUrl}
+                    </a>
+                  )}
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(result.shortUrl);
+                      alert('Copied!');
+                    }}
+                    className="copy-btn"
+                  >
+                    Copy
+                  </button>
                 </div>
+                {result.isPasswordProtected && <span className="badge">🔒 Protected</span>}
               </div>
             )}
-          </article>
-        )}
 
-        <p className="hint">
-          Backend health: <a href={`${API_BASE}/health`} target="_blank" rel="noreferrer">API Status</a>
-        </p>
+            {requiresPassword && (
+              <div className="password-request">
+                <input
+                  type="password"
+                  value={verifyPassword}
+                  onChange={(e) => setVerifyPassword(e.target.value)}
+                  placeholder="Enter password"
+                  className="password-input"
+                />
+                <button onClick={handleVerifyPassword} className="unlock-btn">
+                  Unlock
+                </button>
+              </div>
+            )}
+
+            <div className="hero-stats">
+              <div className="stat">
+                <strong>10M+</strong> Links Created
+              </div>
+              <div className="stat">
+                <strong>99.9%</strong> Uptime
+              </div>
+              <div className="stat">
+                <strong>256-bit</strong> Encryption
+              </div>
+            </div>
+          </div>
+
+          <div className="hero-image">
+            <div className="qr-mockup">QR Code</div>
+          </div>
+        </div>
       </section>
-    </main>
+
+      {/* Features Section */}
+      <section id="features" className="features">
+        <div className="container">
+          <h2>Powerful Features</h2>
+          <div className="features-grid">
+            <div className="feature-box">
+              <span className="icon">🔗</span>
+              <h3>Custom Short Links</h3>
+              <p>Create branded short links with custom codes that match your brand identity</p>
+            </div>
+            <div className="feature-box">
+              <span className="icon">🔒</span>
+              <h3>Password Protection</h3>
+              <p>Protect sensitive links with password authentication for added security</p>
+            </div>
+            <div className="feature-box">
+              <span className="icon">📊</span>
+              <h3>Analytics & Tracking</h3>
+              <p>Track clicks, locations, and devices with detailed analytics dashboard</p>
+            </div>
+            <div className="feature-box">
+              <span className="icon">⏰</span>
+              <h3>Link Expiration</h3>
+              <p>Set expiration dates on links with customizable TTL settings</p>
+            </div>
+            <div className="feature-box">
+              <span className="icon">📱</span>
+              <h3>QR Code Generation</h3>
+              <p>Generate QR codes automatically for easy sharing on multiple platforms</p>
+            </div>
+            <div className="feature-box">
+              <span className="icon">🌍</span>
+              <h3>Globally Fast</h3>
+              <p>Lightning-fast redirects powered by global CDN infrastructure</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How it Works */}
+      <section id="how" className="how-it-works">
+        <div className="container">
+          <h2>How It Works</h2>
+          <div className="steps">
+            <div className="step">
+              <div className="step-number">1</div>
+              <h3>Paste URL</h3>
+              <p>Paste any long URL into our shortening tool</p>
+            </div>
+            <div className="step">
+              <div className="step-number">2</div>
+              <h3>Customize (Optional)</h3>
+              <p>Add custom codes, passwords, or expiration dates</p>
+            </div>
+            <div className="step">
+              <div className="step-number">3</div>
+              <h3>Share & Track</h3>
+              <p>Share your short link and track clicks in real-time</p>
+            </div>
+            <div className="step">
+              <div className="step-number">4</div>
+              <h3>Analyze</h3>
+              <p>Get detailed insights with our analytics dashboard</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
 

@@ -7,13 +7,8 @@ import { nanoid } from 'nanoid';
 const CUSTOM_CODE_PATTERN = /^[a-zA-Z0-9_-]{4,32}$/;
 
 const toResponse = (record, baseUrl) => ({
-  id: record.id,
   originalUrl: record.original_url,
-  shortCode: record.short_code,
   shortUrl: `${baseUrl.replace(/\/$/, '')}/${record.short_code}`,
-  createdAt: record.created_at,
-  clickCount: Number(record.click_count ?? 0),
-  lastAccessedAt: record.last_accessed_at,
   expiresAt: record.expires_at,
   isPasswordProtected: record.is_password_protected ?? false,
 });

@@ -60,7 +60,8 @@ function App() {
     }
 
     try {
-      const response = await fetch(`${API_BASE}/${result.shortCode}/verify-password`, {
+      const shortCode = result.shortUrl.split('/').pop();
+      const response = await fetch(`${API_BASE}/${shortCode}/verify-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: verifyPassword }),

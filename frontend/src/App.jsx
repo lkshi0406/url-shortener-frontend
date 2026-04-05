@@ -10,6 +10,8 @@ function App() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [qrCode, setQrCode] = useState(null);
+  const [qrLoading, setQrLoading] = useState(false);
   const [error, setError] = useState('');
   const [requiresPassword, setRequiresPassword] = useState(false);
   const [verifyPassword, setVerifyPassword] = useState('');
@@ -20,6 +22,7 @@ function App() {
     setIsLoading(true);
     setError('');
     setResult(null);
+    setQrCode(null);
 
     try {
       const response = await fetch(`${API_BASE}/shorten`, {
@@ -46,10 +49,36 @@ function App() {
       setUrl('');
       setCustomCode('');
       setTtlSeconds('');
+
+      // Fetch QR code
+      fetchQRCode(payload.data.shortUrl);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchQRCode = async (shortUrl) => {
+    try {
+      setQrLoading(true);
+      const shortCode = shortUrl.split('/').pop();
+      const response = await fetch(`${API_BASE}/${shortCode}/qr`, {
+        method: 'GET',
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok || !payload.success) {
+        console.error('Failed to generate QR code');
+        return;
+      }
+
+      setQrCode(payload.data.qr);
+    } catch (qrError) {
+      console.error('QR code fetch error:', qrError);
+    } finally {
+      setQrLoading(false);
     }
   };
 
@@ -178,6 +207,15 @@ function App() {
                 </div>
                 {copyMessage && <span className="copy-message">{copyMessage}</span>}
                 {result.isPasswordProtected && <span className="badge">🔒 Protected</span>}
+                
+                {/* QR Code */}
+                {qrLoading ? (
+                  <p style={{ textAlign: 'center', marginTop: '16px', color: '#888' }}>Generating QR code...</p>
+                ) : qrCode ? (
+                  <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                    <img src={qrCode} alt="QR Code" style={{ width: '200px', height: '200px' }} />
+                  </div>
+                ) : null}
               </div>
             )}
 
@@ -210,7 +248,13 @@ function App() {
           </div>
 
           <div className="hero-image">
-            <div className="qr-mockup">QR Code</div>
+            {qrCode ? (
+              <div className="qr-mockup">
+                <img src={qrCode} alt="Generated QR Code" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </div>
+            ) : (
+              <div className="qr-mockup">QR Code</div>
+            )}
           </div>
         </div>
       </section>

@@ -6,6 +6,7 @@ const router = Router();
 
 router.post('/shorten', shortenRateLimiter, urlController.shorten);
 router.post('/:shortCode/verify-password', urlController.verifyPassword);
+router.get('/:shortCode/qr', urlController.generateQRCode);
 router.get('/:shortCode', urlController.redirect);
 
 export default router;

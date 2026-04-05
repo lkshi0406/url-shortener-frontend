@@ -1,6 +1,7 @@
 import { env } from '../config/env.js';
 import { HttpError } from '../utils/errors.js';
 import { urlService } from '../services/urlService.js';
+import { qrCodeService } from '../services/qrCodeService.js';
 
 const parseOptionalTtlSeconds = (value) => {
   if (value === undefined || value === null || value === '') {
@@ -30,6 +31,26 @@ export const urlController = {
       res.status(201).json({
         success: true,
         data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async generateQRCode(req, res, next) {
+    try {
+      const shortUrl = `${env.baseUrl}/${req.params.shortCode}`;
+      const qrCode = await qrCodeService.generateQRCode(shortUrl);
+
+      if (!qrCode) {
+        throw new HttpError(500, 'Failed to generate QR code.');
+      }
+
+      res.status(200).json({
+        success: true,
+        data: {
+          qr: qrCode,
+        },
       });
     } catch (error) {
       next(error);

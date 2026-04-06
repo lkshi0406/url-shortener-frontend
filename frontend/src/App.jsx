@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import QRCode from 'qrcode';
 import './App.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
@@ -50,12 +51,31 @@ function App() {
       setCustomCode('');
       setTtlSeconds('');
 
-      // Fetch QR code
-      fetchQRCode(payload.data.shortUrl);
+      // Generate QR code on frontend
+      generateQRCode(payload.data.shortUrl);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const generateQRCode = async (shortUrl) => {
+    try {
+      setQrLoading(true);
+      const dataUrl = await QRCode.toDataURL(shortUrl, {
+        width: 200,
+        margin: 1,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF',
+        },
+      });
+      setQrCode(dataUrl);
+    } catch (qrError) {
+      console.error('QR code generation failed:', qrError);
+    } finally {
+      setQrLoading(false);
     }
   };
 

@@ -6,12 +6,15 @@ import { nanoid } from 'nanoid';
 
 const CUSTOM_CODE_PATTERN = /^[a-zA-Z0-9_-]{4,32}$/;
 
-const toResponse = (record, baseUrl) => ({
-  originalUrl: record.original_url,
-  shortUrl: `${baseUrl.replace(/\/$/, '')}/${record.short_code}`,
-  expiresAt: record.expires_at,
-  isPasswordProtected: record.is_password_protected ?? false,
-});
+const toResponse = (record, baseUrl) => {
+  const cleanBaseUrl = (baseUrl || '').trim().replace(/[\s\n\r]/g, '').replace(/\/$/, '');
+  return {
+    originalUrl: record.original_url,
+    shortUrl: `${cleanBaseUrl}/${record.short_code}`,
+    expiresAt: record.expires_at,
+    isPasswordProtected: record.is_password_protected ?? false,
+  };
+};
 
 export const urlService = {
   async createShortUrl({ originalUrl, customCode, ttlSeconds, password, baseUrl }) {

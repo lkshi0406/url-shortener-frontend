@@ -63,7 +63,17 @@ function App() {
   const generateQRCode = async (shortUrl) => {
     try {
       setQrLoading(true);
-      const dataUrl = await QRCode.toDataURL(shortUrl, {
+      // Trim and ensure proper URL format
+      const cleanUrl = (shortUrl || '').trim();
+      
+      if (!cleanUrl) {
+        console.error('Invalid short URL:', shortUrl);
+        return;
+      }
+
+      console.log('Generating QR code for:', cleanUrl);
+      
+      const dataUrl = await QRCode.toDataURL(cleanUrl, {
         width: 200,
         margin: 1,
         color: {
